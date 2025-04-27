@@ -7,14 +7,14 @@ const payments = {};
 
 app.use(express.json());
 
-app.post('/charge', (req, res) => {
+app.post('/charge', async (req, res) => {
   try {
     const { userId, amount } = req.body;
 
     if (!userId || !amount) {
       return res.status(400).json({ error: 'userId e amount são obrigatórios' });
     }
-
+    const response = await axios.get(`http://localhost:3001/products`);
     const paymentId = Date.now();
     
     payments[paymentId] = { userId, amount, status: 'PENDING' };
@@ -26,7 +26,7 @@ app.post('/charge', (req, res) => {
       console.log(`Pagamento de ${amount} concluído para o usuário ${userId}`);
 
       try {
-        await axios.post('http://product-service:3001/payment-status', {
+        await axios.post('http://localhost:3001/payment-status', {
           paymentId,
           status: 'COMPLETED'
         });
